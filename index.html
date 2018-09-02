@@ -1,0 +1,126 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>VM List - Tortilla Project</title>
+
+    <style>
+        table, th, td {
+            border: 1px solid black;
+            padding: 15px;
+            text-align: left;
+            border-collapse: collapse;
+        }
+    </style>
+
+    <script src="config.js"></script>
+    <script src="functions.js"></script>
+    <script>
+            if (getCookie("sesskey") === undefined) {
+                window.location.replace('/login.html');
+            }
+    </script>
+</head>
+<body>
+
+<div style="text-align: center"><h1>Список виртуальных машин</h1></div>
+<div style="text-align: center" id="loadingStatus">Загружается...</div>
+<br>
+
+<div style="width:70%; margin:0 auto;">
+    <a href="/logout.html">Logout</a>
+    <br>
+    <table id="vmlist">
+        <thead>
+            <tr>
+                <th style="width: 20%;">VM name</th>
+                <th style="width: 20%;">VM status</th>
+                <th style="width: 40%;">Most recent task</th>
+                <th style="width: 20%;">Most recent task status</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+</div>
+
+<script type="text/javascript">
+    /*  1. async ask for data
+        2. if data.code != 200 -> console.log errors and show error to user
+        3. if data.code == 200 -> add VMs to table "vmlist" and change "loadingStatus"
+            3.1. Each VM name - a href with parameters
+    */
+
+
+    //get vms
+    getVMList(config.controllerUrl + config.controllerBaseAPI, addVMsToTable, errorGetVM);
+
+    function addVMsToTable(VMArray) {
+        function addRowToVMList(name, status, task, taskStatus, server, protocol, port, vmid) {
+            var tableRef = document.getElementById('vmlist').getElementsByTagName('tbody')[0];
+            var newRow = tableRef.insertRow(tableRef.rows.length);
+
+            //create connection string
+            var url = 'connect.html?' +
+                "server=" + server +
+                "&protocol=" + protocol +
+                "&port=" + port;
+
+            if (vmid !== null) {
+                url = url + "&vmid=" + vmid;
+            }
+
+            //insert values
+            var nameCell  = newRow.insertCell(0);
+            var nametxt  = document.createTextNode(name);
+            var href = document.createElement("a");
+            href.setAttribute("target", "_blank");
+            href.setAttribute('href', url);
+            href.appendChild(nametxt);
+            nameCell.appendChild(href);
+
+            var statusCell = newRow.insertCell(1);
+            var statustxt  = document.createTextNode(status);
+            statusCell.appendChild(statustxt);
+
+            var taskCell = newRow.insertCell(2);
+            var tasktxt  = document.createTextNode(task);
+            taskCell.appendChild(tasktxt);
+
+            var taskStatusCell = newRow.insertCell(3);
+            var taskstatustxt  = document.createTextNode(taskStatus);
+            taskStatusCell.appendChild(taskstatustxt);
+        }
+
+        //add vms to table
+        for (var i = 0; i < VMArray.length; i++) {
+            addRowToVMList(
+                VMArray[i]["name"],
+                VMArray[i]["status"],
+                VMArray[i]["task"],
+                VMArray[i]["taskStatus"],
+                VMArray[i]["server"],
+                VMArray[i]["protocol"],
+                VMArray[i]["port"],
+                VMArray[i]["vmid"]
+            )
+        }
+
+        //change status to "loaded"
+        document.getElementById("loadingStatus").innerHTML = "Загружено";
+    }
+
+    function errorGetVM(reason, humanReason) {
+        if (reason == "unauthenticated") {
+            alert("Your session expired or you was not properly authenticated. Redirecting to login page...");
+            window.location.replace('/logout.html');
+        } else if (reason == "unauthorized") {
+            // TODO: change from alert to something normal
+            alert("You don't have permissions to this resource");
+        } else {
+            alert(humanReason);
+        }
+    }
+</script>
+
+</body>
+</html>

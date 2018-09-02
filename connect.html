@@ -1,0 +1,158 @@
+<html>
+<meta charset="UTF-8">
+<head>
+    <title>VM - Tortilla Project</title>
+    <script src="config.js"></script>
+    <script src="functions.js"></script>
+</head>
+
+<body>
+
+<!-- ctrl alt del button -->
+<input id="cad" value="Ctrl+Alt+Del" type="button">
+<br>
+
+<!-- Guacamole -->
+<script type="text/javascript"
+        src="guacamole-common-js/all.min.js"></script>
+
+<!-- Display -->
+<div id="display"></div>
+
+<!-- Init -->
+<script type="text/javascript"> /* <![CDATA[ */
+
+    // Get display div from document
+    var display = document.getElementById("display");
+
+    // Instantiate client, using an HTTP tunnel for communications.
+    var guac = new Guacamole.Client(
+        new Guacamole.HTTPTunnel(config.guacamoleUrl)
+    );
+
+    // Add client to display div
+    display.appendChild(guac.getDisplay().getElement());
+
+    // Error handler
+    guac.onerror = function (error) {
+        console.log(error);
+        alert(error.message);
+    };
+    
+
+    // Disconnect on close
+    window.onunload = function () {
+        guac.disconnect();
+    };
+
+    // Mouse
+    var mouse = new Guacamole.Mouse(guac.getDisplay().getElement());
+
+    mouse.onmousedown =
+        mouse.onmouseup =
+            mouse.onmousemove = function (mouseState) {
+                guac.sendMouseState(mouseState);
+            };
+
+    // Keyboard
+    var keyboard = new Guacamole.Keyboard(document);
+
+    keyboard.onkeydown = function (keysym) {
+        guac.sendKeyEvent(1, keysym);
+    };
+
+    keyboard.onkeyup = function (keysym) {
+        guac.sendKeyEvent(0, keysym);
+    };
+
+
+    // Ctrl + Alt + Del button
+    function ctrl_alt_del() {
+        guac.sendKeyEvent(1, 0xFFE3);
+        guac.sendKeyEvent(1, 0xFFE9);
+        guac.sendKeyEvent(1, 0xFFFF);
+        guac.sendKeyEvent(0, 0xFFE3);
+        guac.sendKeyEvent(0, 0xFFE9);
+        guac.sendKeyEvent(0, 0xFFFF);
+    }
+
+    var cad_btn = document.getElementById("cad");
+    cad_btn.onclick = ctrl_alt_del;
+
+
+    var vmid = getParameterByName("vmid");
+    if (!vmid) {
+        alert("VMID is incorrect!");
+        window.setTimeout(function() {window.location.replace('/index.html');}, 1000);
+    }
+
+    // Get VM info from controller
+    httpRequestAsync(
+            config.controllerUrl + config.controllerBaseAPI + "vminfo?vmid=" + vmid,
+            "GET",
+            null,
+            null,
+            onAnswerVMInfo
+        );
+
+    function onAnswerVMInfo(status, text) {
+        data = JSON.parse(text);
+        if (status == 200) {
+            console.log(text);
+
+            // ask for serverkey
+            httpRequestAsync(
+                config.controllerUrl + config.controllerBaseAPI + "key",
+                "GET",
+                null,
+                null,
+                onAnswerKey
+                );
+            
+             // Connect
+            function onAnswerKey(status, text) {
+                data = JSON.parse(text);
+                if (status == 200) {
+
+                    // reconstruct password
+                    var serverkey = data['serverkey'];
+                    var userkey = localStorage.getItem("userkey");
+                    var password = crypt(serverkey, userkey);
+
+                    console.log(password);
+                    console.log(text);
+                    
+                    var url =   "domain=" + data['domain'] + 
+                                "&username=" + data['username'] +
+                                "&password=" + password +
+                                "&server=" + data['vmhost'] +
+                                "&protocol=" + data['protocol'] +
+                                "&port=" + data['port'] +
+                                "&vmid=" + data['vmid'];
+
+
+                    guac.connect(url);
+                } else {
+                    alert("Can't get user info from controller. Reason: " + text['human_reason']);
+                    window.setTimeout(function() {window.location.replace('/index.html');}, 1000);
+                }
+                
+            }
+
+        } else {
+            alert("Can't get VM info from controller. Reason: " + text['human_reason']);
+            window.setTimeout(function() {window.location.replace('/index.html');}, 1000);
+        }
+    }
+
+    
+
+   
+        
+    
+
+/* ]]> */ </script>
+
+</body>
+
+</html>

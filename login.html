@@ -1,0 +1,106 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Login page - Tortilla Project</title>
+    <script src="functions.js"></script>
+    <script src="config.js"></script>
+    <script>
+        if (getCookie("sesskey") !== undefined) {
+            window.location.replace('/index.html');
+        }
+    </script>
+</head>
+<body>
+<div>
+    <form action="javascript://" onsubmit="sendForm()">
+        <h2>Please Login</h2>
+        <label id="result"></label><br>
+        <label for="username">Username</label>
+        <input id="username" name="username"/>
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password"/>
+        
+        <div>
+            <button id="login_button">Log in</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    function sendForm(){
+        //get domain and username from field
+        var userfield = document.getElementsByName("username")[0].value;
+        var password = document.getElementsByName("password")[0].value;
+
+        //split field value to domain and username
+        var result;
+        var domain;
+        var username;
+
+        if (userfield.includes("@")) {
+            // username@avalon.ru
+
+            result = userfield.split("@");
+            domain = result[1].split(".")[0]; //avalon.ru to avalon
+            username = result[0];
+        } else {
+            if (userfield.includes("\\")) {
+                // AVALON\username
+
+                result = userfield.split("\\");
+                domain = result[0];
+                username = result[1];
+            } else {
+                // username 
+
+                domain = "AVALON";
+                username = userfield;
+            }
+        }
+
+        function onAnswer(status, text) {
+            answer = JSON.parse(text);
+            if (status == 200) {
+                // set something to green to visualize successfull login
+                document.getElementById("result").innerHTML = "Success!";
+
+                // save user key
+                var userkey = '';
+                for (var i=0; i < answer['userkey'].length; i++) {
+                    userkey += String.fromCharCode(answer['userkey'][i]);
+                }
+                localStorage.setItem("userkey", userkey);
+
+                // wait a second and redirect to main page
+                window.setTimeout(function() {window.location.replace('/index.html');}, 1000)
+                
+            } else {
+                console.log(text);
+                document.getElementById("result").innerHTML = "Error! " + answer['human_reason'];
+            }
+        }
+
+
+        // send POST to api
+        httpRequestAsync(
+            config.controllerUrl + config.controllerBaseAPI + "login",
+            "POST",
+            {
+                'Content-Type': 'application/json'
+            },
+            JSON.stringify(
+            {
+                "domain": domain,
+                "username": username,
+                "password": password
+            }),
+            onAnswer
+        );       
+
+        return true;
+    }
+</script>
+
+
+</body>
+</html>
