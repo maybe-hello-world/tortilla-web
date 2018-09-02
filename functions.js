@@ -64,8 +64,8 @@ function getVMList(url, callbackSuccess, callbackError) {
             callbackError(resp['reason'], resp['human_reason']);
         } else {
             try {
-                var VMList = JSON.parse(text);
-                callbackSuccess(VMList);
+                var data = JSON.parse(text);
+                callbackSuccess(data['list']);
             } catch (err) {
                 console.log(err);
             }

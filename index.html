@@ -55,19 +55,12 @@
     getVMList(config.controllerUrl + config.controllerBaseAPI, addVMsToTable, errorGetVM);
 
     function addVMsToTable(VMArray) {
-        function addRowToVMList(name, status, task, taskStatus, server, protocol, port, vmid) {
+        function addRowToVMList(name, status, task, taskStatus, vmid) {
             var tableRef = document.getElementById('vmlist').getElementsByTagName('tbody')[0];
             var newRow = tableRef.insertRow(tableRef.rows.length);
 
             //create connection string
-            var url = 'connect.html?' +
-                "server=" + server +
-                "&protocol=" + protocol +
-                "&port=" + port;
-
-            if (vmid !== null) {
-                url = url + "&vmid=" + vmid;
-            }
+            var url = 'connect.html?vmid=' + vmid;
 
             //insert values
             var nameCell  = newRow.insertCell(0);
@@ -98,9 +91,6 @@
                 VMArray[i]["status"],
                 VMArray[i]["task"],
                 VMArray[i]["taskStatus"],
-                VMArray[i]["server"],
-                VMArray[i]["protocol"],
-                VMArray[i]["port"],
                 VMArray[i]["vmid"]
             )
         }
