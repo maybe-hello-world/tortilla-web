@@ -1,6 +1,6 @@
 <html>
+<meta charset="UTF-8">
 <head>
-    <meta charset="UTF-8">
     <title>VM List - Tortilla Project</title>
 
     <style>
@@ -12,13 +12,71 @@
         }
     </style>
 
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-contextmenu/2.7.0/jquery.contextMenu.min.css">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-contextmenu/2.7.0/jquery.contextMenu.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-contextmenu/2.7.0/jquery.ui.position.js"></script>
     <script src="config.js"></script>
     <script src="functions.js"></script>
+    
+    <!-- Check if user logged in -->
+    <script> if (getCookie("sesskey") === undefined) { window.location.replace('/login.html'); }</script>
+
     <script>
-            if (getCookie("sesskey") === undefined) {
-                window.location.replace('/login.html');
+        // context menu block
+        $(function() {
+            $.contextMenu({
+                selector: '.context-menu-one',
+                hideOnSecondTrigger: true,
+                callback: contextMenuCallback,
+                items: {
+                    "console": {name: "Console"},
+                    "start": {name: "Start"},
+                    "save": {name: "Save"},
+                    "shutdown": {name: "Shut Down"},
+                    "poweroff": {name: "Power Off"}
+                }
+            });   
+        });
+
+        function contextMenuCallback(key, opt) {
+            var action = key;
+            var vmid = opt.$trigger.attr("vmid");
+            var vmprovider = opt.$trigger.attr("vmprovider");
+
+            if (action == "console") {
+                var win = window.open("connect.html?vmid=" + vmid, '_blank');
+                win.focus();
+            } else {
+                httpRequestAsync(
+                    config.controllerUrl + config.controllerBaseAPI + "vm",
+                    "POST",
+                    {
+                        "Content-Type": "application/json"
+                    },
+                    JSON.stringify(
+                    {
+                        "vmid": vmid,
+                        "action": action,
+                        "vmprovider": vmprovider
+                    }),
+                    commandSendCallback
+                );
             }
+        }
+
+        function commandSendCallback(status, text) {
+            if (status != 204) {
+                var data = JSON.parse(text);
+                alert(data['human_reason']);
+            } else {
+                // refresh vm data
+                window.setTimeout(getVMList(config.controllerUrl + config.controllerBaseAPI, addVMsToTable, errorGetVM), 10000);
+            }
+        }
     </script>
+    
 </head>
 <body>
 
@@ -44,18 +102,13 @@
 </div>
 
 <script type="text/javascript">
-    /*  1. async ask for data
-        2. if data.code != 200 -> console.log errors and show error to user
-        3. if data.code == 200 -> add VMs to table "vmlist" and change "loadingStatus"
-            3.1. Each VM name - a href with parameters
-    */
-
+    //get VMs block
 
     //get vms
     getVMList(config.controllerUrl + config.controllerBaseAPI, addVMsToTable, errorGetVM);
 
     function addVMsToTable(VMArray) {
-        function addRowToVMList(name, status, task, taskStatus, vmid) {
+        function addRowToVMList(name, status, task, taskStatus, vmid, vmprovider) {
             var tableRef = document.getElementById('vmlist').getElementsByTagName('tbody')[0];
             var newRow = tableRef.insertRow(tableRef.rows.length);
 
@@ -64,13 +117,17 @@
 
             //insert values
             var nameCell  = newRow.insertCell(0);
-            var nametxt  = document.createTextNode(name);
+            var namespan = document.createElement("span");
+            namespan.setAttribute("class", "context-menu-one btn btn-neutral");
+            namespan.setAttribute("vmid", vmid);
+            namespan.setAttribute("vmprovider", vmprovider);
+            namespan.textContent = name;
             var href = document.createElement("a");
             href.setAttribute("target", "_blank");
             href.setAttribute('href', url);
-            href.appendChild(nametxt);
+            href.appendChild(namespan);
             nameCell.appendChild(href);
-
+            
             var statusCell = newRow.insertCell(1);
             var statustxt  = document.createTextNode(status);
             statusCell.appendChild(statustxt);
@@ -91,7 +148,8 @@
                 VMArray[i]["status"],
                 VMArray[i]["task"],
                 VMArray[i]["taskStatus"],
-                VMArray[i]["vmid"]
+                VMArray[i]["vmid"],
+                VMArray[i]["vmprovider"]
             )
         }
 
