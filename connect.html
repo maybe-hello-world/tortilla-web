@@ -4,6 +4,7 @@
     <title>VM - Tortilla Project</title>
     <script src="config.js"></script>
     <script src="functions.js"></script>
+    <script> if (getCookie("sesskey") === undefined) { window.location.replace('/login.html'); }</script>
 </head>
 
 <body>
@@ -86,34 +87,12 @@
         window.setTimeout(function() {window.location.replace('/index.html');}, 1000);
     }
 
-    // Get VM info from controller
-    httpRequestAsync(
-            config.controllerUrl + config.controllerBaseAPI + "vminfo?vmid=" + vmid,
-            "GET",
-            null,
-            null,
-            onAnswerVMInfo
-        );
+    var url =   "sesskey=" + getCookie('sesskey') +
+                "&userkey=" + localStorage.getItem("userkey") +
+                "&vmid=" + data['vmid'];
 
-    function onAnswerVMInfo(status, text) {
-        data = JSON.parse(text);
-        if (status == 200) {
-            console.log(text);
-
-                var url =   "sesskey=" + getCookie('sesskey') +
-                            "&server=" + data['vmhost'] +
-                            "&protocol=" + data['protocol'] +
-                            "&port=" + data['port'] +
-                            "&vmid=" + data['vmid'];
-
-
-                guac.connect(url);
+    guac.connect(url);
                 
-        } else {
-            alert("Can't get VM info from controller. Reason: " + text['human_reason']);
-            window.setTimeout(function() {window.location.replace('/index.html');}, 1000);
-        }
-    }
 /* ]]> */ </script>
 
 </body>
