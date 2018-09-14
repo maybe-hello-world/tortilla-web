@@ -100,7 +100,8 @@
         if (status == 200) {
             console.log(text);
 
-                var url =   "server=" + data['vmhost'] +
+                var url =   "sesskey=" + getCookie('sesskey') +
+                            "&server=" + data['vmhost'] +
                             "&protocol=" + data['protocol'] +
                             "&port=" + data['port'] +
                             "&vmid=" + data['vmid'];
