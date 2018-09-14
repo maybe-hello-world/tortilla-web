@@ -100,57 +100,19 @@
         if (status == 200) {
             console.log(text);
 
-            // ask for serverkey
-            httpRequestAsync(
-                config.controllerUrl + config.controllerBaseAPI + "key",
-                "GET",
-                null,
-                null,
-                onAnswerKey
-                );
-            
-             // Connect
-            function onAnswerKey(status, text) {
-                data = JSON.parse(text);
-                if (status == 200) {
-
-                    // reconstruct password
-                    var serverkey = data['serverkey'];
-                    var userkey = localStorage.getItem("userkey");
-                    var password = crypt(serverkey, userkey);
-
-                    console.log(password);
-                    console.log(text);
-                    
-                    var url =   "domain=" + data['domain'] + 
-                                "&username=" + data['username'] +
-                                "&password=" + password +
-                                "&server=" + data['vmhost'] +
-                                "&protocol=" + data['protocol'] +
-                                "&port=" + data['port'] +
-                                "&vmid=" + data['vmid'];
+                var url =   "server=" + data['vmhost'] +
+                            "&protocol=" + data['protocol'] +
+                            "&port=" + data['port'] +
+                            "&vmid=" + data['vmid'];
 
 
-                    guac.connect(url);
-                } else {
-                    alert("Can't get user info from controller. Reason: " + text['human_reason']);
-                    window.setTimeout(function() {window.location.replace('/index.html');}, 1000);
-                }
+                guac.connect(url);
                 
-            }
-
         } else {
             alert("Can't get VM info from controller. Reason: " + text['human_reason']);
             window.setTimeout(function() {window.location.replace('/index.html');}, 1000);
         }
     }
-
-    
-
-   
-        
-    
-
 /* ]]> */ </script>
 
 </body>
