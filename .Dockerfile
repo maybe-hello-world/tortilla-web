@@ -6,3 +6,7 @@ RUN rm /etc/nginx/conf.d/examplessl.conf
 
 COPY tortilla.conf /etc/nginx/nginx.conf
 COPY site/ /usr/share/nginx/static
+
+EXPOSE 80
+
+CMD ["nginx", "-c", "/etc/nginx/nginx.conf"]
