@@ -21,7 +21,7 @@
     <script src="functions.js"></script>
     
     <!-- Check if user logged in -->
-    <script> if (getCookie("sesskey") === undefined) { window.location.replace('/login.html'); }</script>
+    <script> if (getCookie("sesskey") === undefined) { window.location.replace('/login'); }</script>
 
     <script>
         // context menu block
@@ -46,7 +46,7 @@
             var vmprovider = opt.$trigger.attr("vmprovider");
 
             if (action == "console") {
-                var win = window.open("connect.html?vmid=" + vmid, '_blank');
+                var win = window.open("connect?vmid=" + vmid, '_blank');
                 win.focus();
             } else {
                 httpRequestAsync(
@@ -85,7 +85,7 @@
 <br>
 
 <div style="width:70%; margin:0 auto;">
-    <a href="/logout.html">Logout</a>
+    <a href="/logout">Logout</a>
     <br>
     <table id="vmlist">
         <thead>
@@ -113,7 +113,7 @@
             var newRow = tableRef.insertRow(tableRef.rows.length);
 
             //create connection string
-            var url = 'connect.html?vmid=' + vmid;
+            var url = 'connect?vmid=' + vmid;
 
             //insert values
             var nameCell  = newRow.insertCell(0);
@@ -160,7 +160,7 @@
     function errorGetVM(reason, humanReason) {
         if (reason == "unauthenticated") {
             alert("Your session expired or you was not properly authenticated. Redirecting to login page...");
-            window.location.replace('/logout.html');
+            window.location.replace('/logout');
         } else if (reason == "unauthorized") {
             // TODO: change from alert to something normal
             alert("You don't have permissions to this resource");

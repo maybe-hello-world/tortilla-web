@@ -4,7 +4,7 @@
     <title>VM - Tortilla Project</title>
     <script src="config.js"></script>
     <script src="functions.js"></script>
-    <script> if (getCookie("sesskey") === undefined) { window.location.replace('/login.html'); }</script>
+    <script> if (getCookie("sesskey") === undefined) { window.location.replace('/login'); }</script>
 </head>
 
 <body>
@@ -84,7 +84,7 @@
     var vmid = getParameterByName("vmid");
     if (!vmid) {
         alert("VMID is incorrect!");
-        window.setTimeout(function() {window.location.replace('/index.html');}, 1000);
+        window.setTimeout(function() {window.location.replace('/');}, 1000);
     }
 
     var url =   "sesskey=" + getCookie('sesskey') +

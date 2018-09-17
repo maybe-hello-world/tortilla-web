@@ -1,5 +1,5 @@
 config = {
-    controllerUrl: "http://localhost:5876/",
+    controllerUrl: "",
     controllerBaseAPI: "api/v1/",
-    guacamoleUrl: "http://localhost:8080/tunnel",
+    guacamoleUrl: "",
 };
