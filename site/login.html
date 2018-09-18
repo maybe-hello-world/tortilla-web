@@ -32,32 +32,6 @@
         var userfield = document.getElementsByName("username")[0].value;
         var password = document.getElementsByName("password")[0].value;
 
-        //split field value to domain and username
-        var result;
-        var domain;
-        var username;
-
-        if (userfield.includes("@")) {
-            // username@avalon.ru
-
-            result = userfield.split("@");
-            domain = result[1].split(".")[0]; //avalon.ru to avalon
-            username = result[0];
-        } else {
-            if (userfield.includes("\\")) {
-                // AVALON\username
-
-                result = userfield.split("\\");
-                domain = result[0];
-                username = result[1];
-            } else {
-                // username 
-
-                domain = "AVALON";
-                username = userfield;
-            }
-        }
-
         function onAnswer(status, text) {
             answer = JSON.parse(text);
             if (status == 200) {
@@ -90,8 +64,7 @@
             },
             JSON.stringify(
             {
-                "domain": domain,
-                "username": username,
+                "username": userfield,
                 "password": password
             }),
             onAnswer
