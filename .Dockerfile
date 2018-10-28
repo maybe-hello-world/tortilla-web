@@ -1,4 +1,4 @@
-FROM nginx
+FROM nginx:alpine
 LABEL maintainer="maybe.hello.world@gmail.com"
 
 RUN rm /etc/nginx/conf.d/default.conf
@@ -9,4 +9,4 @@ COPY site/ /usr/share/nginx/static
 
 EXPOSE 80
 
-CMD ["nginx", "-c", "/etc/nginx/nginx.conf"]
+CMD ["nginx", "-c", "/etc/nginx/nginx.conf", "-g", "daemon off;"]
