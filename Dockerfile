@@ -9,4 +9,4 @@ COPY site/ /usr/share/nginx/static
 
 EXPOSE 80
 
-CMD ["nginx", "-c", "/etc/nginx/nginx.conf", "-g", "daemon off;"]
+CMD ["nginx", "-c", "/etc/nginx/nginx.conf"]
