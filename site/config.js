@@ -1,5 +1,5 @@
 config = {
     controllerUrl: "",
     controllerBaseAPI: "api/v1/",
-    guacamoleUrl: "",
+    guacamoleUrl: "guacamole/tunnel",
 };
