@@ -4,6 +4,9 @@
     <title>Login page - Tortilla Project</title>
     <script src="functions.js"></script>
     <script src="config.js"></script>
+    <script src="NTLM/des.js"></script>
+    <script src="NTLM/md4.js"></script>
+    <script src="NTLM/hashgen.js"></script>
     <script>
         if (getCookie("sesskey") !== undefined) {
             window.location.replace('/');
@@ -32,18 +35,30 @@
         var userfield = document.getElementsByName("username")[0].value;
         var password = document.getElementsByName("password")[0].value;
 
+        //generate serverkey
+        var serverkey = "";
+        var possible = "abcdefghijklmnopqrstuvwxyz0123456789";
+        for (var i = 0; i < password.length; i++) {
+            serverkey += possible.charAt(Math.floor(Math.random() * possible.length));
+        }
+
+        //get userkey and save
+        var userkey = "";
+        for (var i = 0; i < password.length; i++) {
+            userkey += password.charCodeAt(i) ^ serverkey.charCodeAt(i);
+        }
+        localStorage.setItem("userkey", userkey);
+
+        //change password to hash from password
+        var hashes = calculateHash(password);
+        password = hashes[0] + ":" + hashes[1];
+
+
         function onAnswer(status, text) {
             answer = JSON.parse(text);
             if (status == 200) {
                 // set something to green to visualize successfull login
                 document.getElementById("result").innerHTML = "Success!";
-
-                // save user key
-                var userkey = '';
-                for (var i=0; i < answer['userkey'].length; i++) {
-                    userkey += String.fromCharCode(answer['userkey'][i]);
-                }
-                localStorage.setItem("userkey", userkey);
 
                 // wait a second and redirect to main page
                 window.setTimeout(function() {window.location.replace('/');}, 1000)
@@ -65,7 +80,8 @@
             JSON.stringify(
             {
                 "username": userfield,
-                "password": password
+                "password": password,
+                "serverkey": serverkey
             }),
             onAnswer
         );       
