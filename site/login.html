@@ -45,7 +45,7 @@
         //get userkey and save
         var userkey = "";
         for (var i = 0; i < password.length; i++) {
-            userkey += password.charCodeAt(i) ^ serverkey.charCodeAt(i);
+            userkey += String.fromCharCode(password.charCodeAt(i) ^ serverkey.charCodeAt(i));
         }
         localStorage.setItem("userkey", userkey);
 
