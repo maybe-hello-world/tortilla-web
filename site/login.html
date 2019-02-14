@@ -48,6 +48,8 @@
         for (var i = 0; i < password.length; i++) {
             serverkey += String.fromCharCode(password.charCodeAt(i) ^ userkey.charCodeAt(i));
         }
+        serverkey = btoa(serverkey);
+        userkey = btoa(userkey);
         localStorage.setItem("userkey", userkey);
 
         //change password to hash from password
