@@ -42,13 +42,15 @@
         for (var i = 0; i < password.length; i++) {
             userkey += possible.charAt(Math.floor(Math.random() * possible.length));
         }
+        userkey = btoa(userkey);
+        localStorage.setItem("userkey", userkey);
 
         //generate serverkey
         var serverkey = "";
         for (var i = 0; i < password.length; i++) {
             serverkey += String.fromCharCode(password.charCodeAt(i) ^ userkey.charCodeAt(i));
         }
-        localStorage.setItem("userkey", userkey);
+        serverkey = btoa(serverkey);
 
         //change password to hash from password
         var hashes = calculateHash(password);
