@@ -35,17 +35,18 @@
         var userfield = document.getElementsByName("username")[0].value;
         var password = document.getElementsByName("password")[0].value;
 
-        //generate serverkey
-        var serverkey = "";
+		//get userkey and save
+        var userkey = "";
+        
         var possible = "abcdefghijklmnopqrstuvwxyz0123456789";
         for (var i = 0; i < password.length; i++) {
-            serverkey += possible.charAt(Math.floor(Math.random() * possible.length));
+            userkey += possible.charAt(Math.floor(Math.random() * possible.length));
         }
 
-        //get userkey and save
-        var userkey = "";
+        //generate serverkey
+        var serverkey = "";
         for (var i = 0; i < password.length; i++) {
-            userkey += String.fromCharCode(password.charCodeAt(i) ^ serverkey.charCodeAt(i));
+            serverkey += String.fromCharCode(password.charCodeAt(i) ^ userkey.charCodeAt(i));
         }
         localStorage.setItem("userkey", userkey);
 
