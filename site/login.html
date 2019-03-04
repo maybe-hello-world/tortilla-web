@@ -11,6 +11,8 @@
         if (getCookie("sesskey") !== undefined) {
             window.location.replace('/');
         }
+
+        let isClicked = false;
     </script>
 </head>
 <body>
@@ -31,6 +33,13 @@
 
 <script>
     function sendForm(){
+        // double click
+        if (isClicked) {
+            console.log("already clicked");
+            return true;
+        }
+        isClicked = true;
+
         //get domain and username from field
         var userfield = document.getElementsByName("username")[0].value;
         var password = document.getElementsByName("password")[0].value;
@@ -45,7 +54,7 @@
 
         //generate serverkey
         var serverkey = "";
-        for (var i = 0; i < password.length; i++) {
+        for (i = 0; i < password.length; i++) {
             serverkey += String.fromCharCode(password.charCodeAt(i) ^ userkey.charCodeAt(i));
         }
         serverkey = btoa(serverkey);
@@ -58,8 +67,16 @@
 
 
         function onAnswer(status, text) {
-            answer = JSON.parse(text);
-            if (status == 200) {
+            let answer;
+            try {
+                answer = JSON.parse(text);
+            } catch (e) {
+                console.log("Status: " + status);
+                console.log("Text: " + text);
+                return;
+            }
+
+            if (status === 200) {
                 // set something to green to visualize successfull login
                 document.getElementById("result").innerHTML = "Success!";
 
