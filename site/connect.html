@@ -51,7 +51,9 @@
     );
 
     // Add client to display div
-    display.appendChild(guac.getDisplay().getElement());
+    var displayElem = guac.getDisplay().getElement()
+    displayElem.style.margin = "auto";
+    display.appendChild(displayElem);
 
     // Error handler
     guac.onerror = function (error) {
