@@ -1,33 +1,31 @@
 <html>
 <meta charset="UTF-8">
 <head>
-    <title>VM List - Tortilla Project</title>
+    <title>VM list - Tortilla Project</title>
 
-    <style>
-        table, th, td {
-            border: 1px solid black;
-            padding: 15px;
-            text-align: left;
-            border-collapse: collapse;
-        }
-    </style>
+	<link href="/css/jquery.contextMenu.min.css" rel="stylesheet" type="text/css">
+	<link href="/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+	<link href="/css/bootstrap-table.min.css" rel="stylesheet"> 
 
-    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-contextmenu/2.7.0/jquery.contextMenu.min.css">
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-contextmenu/2.7.0/jquery.contextMenu.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-contextmenu/2.7.0/jquery.ui.position.js"></script>
-    <script src="config.js"></script>
-    <script src="functions.js"></script>
+	<script src="/js/jquery.min.js"></script>
+    <script src="/js/jquery.contextMenu.min.js"></script>
+    <script src="/js/jquery.ui.position.js"></script>
+	<script src="/js/bootstrap.js"></script>
+	<script src="/js/bootstrap-table.min.js"></script>
+    <script src="/js/config.js"></script>
+    <script src="/js/functions.js"></script>
     
     <!-- Check if user logged in -->
-    <script> if (getCookie("sesskey") === undefined) { window.location.replace('/login'); }</script>
+    <script> 
+        if (getCookie("sesskey") === undefined) { window.location.replace('/login'); }
+    </script>
 
     <script>
         // context menu block
         $(function() {
             $.contextMenu({
                 selector: '.context-menu-one',
+                trigger: 'left',
                 hideOnSecondTrigger: true,
                 callback: contextMenuCallback,
                 items: {
@@ -68,36 +66,55 @@
 
         function commandSendCallback(status, text) {
             if (status != 204) {
-                var data = JSON.parse(text);
-                alert(data['human_reason']);
+                try {
+                    var data = JSON.parse(text);
+                    loadingFailed(data['human_reason']);
+                } catch (err) {
+                    loadingFailed(text);
+                }
             } else {
                 // refresh vm data
-                window.setTimeout(getVMList(config.controllerUrl + config.controllerBaseAPI, addVMsToTable, errorGetVM), 10000);
+                window.setTimeout(getVMList(config.controllerUrl + config.controllerBaseAPI, addVMsToTable, errorGetVM), 15000);
             }
+        }
+
+        function loadingFailed(text) {
+            document.getElementById("loadingStatus").innerHTML = text;
+            document.getElementById("table").style.visibility = "hidden";
         }
     </script>
     
 </head>
 <body>
+<nav class="navbar navbar-light bg-light">
+    <button class="btn btn-outline-success my-2 my-sm-0" style="visibility: hidden">Logout</button>
 
-<div style="text-align: center"><h1>Список виртуальных машин</h1></div>
-<div style="text-align: center" id="loadingStatus">Загружается...</div>
+    <ul class="nav navbar-nav mx-auto">
+        <li class="nav-item navbar-brand">Список виртуальных машин</li>
+    </ul>
+    
+    <form class="form-inline" style="margin-top: 5px;margin-bottom: 5px;" action="/logout">
+        <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Logout</button>
+    </form>
+</nav>
 <br>
+<div style="text-align: center" id="loadingStatus">Загружается...</div>
 
-<div style="width:70%; margin:0 auto;">
-    <a href="/logout">Logout</a>
-    <br>
-    <table id="vmlist">
-        <thead>
+<div style="width:80%; height:70%; margin:0 auto;">
+    <table 
+        id="table" 
+        data-sortable="true"
+        data-search="true"
+        class="table table-striped">
+          <thead class="thead-light">
             <tr>
-                <th style="width: 20%;">VM name</th>
-                <th style="width: 20%;">VM status</th>
-                <th style="width: 40%;">Most recent task</th>
-                <th style="width: 20%;">Most recent task status</th>
+              <th data-field="name" data-sortable="true">VM name</th>
+              <th data-field="action">Actions</th>
+              <th data-field="status" data-sortable="true">VM status</th>
+              <th data-field="task" data-sortable="true">Most recent task</th>
+              <th data-field="taskStatus" data-sortable="true">Most recent task status</th>
             </tr>
-        </thead>
-        <tbody>
-        </tbody>
+          </thead>
     </table>
 </div>
 
@@ -108,37 +125,31 @@
     getVMList(config.controllerUrl + config.controllerBaseAPI, addVMsToTable, errorGetVM);
 
     function addVMsToTable(VMArray) {
-        function addRowToVMList(name, status, task, taskStatus, vmid, vmprovider) {
-            var tableRef = document.getElementById('vmlist').getElementsByTagName('tbody')[0];
-            var newRow = tableRef.insertRow(tableRef.rows.length);
-
-            //create connection string
+        var VMdata = [];
+        function addRowToVMList(name, status, task, taskStatus, vmid, vmprovider, vmarray) {
+           
+            //create connection string for VM name
             var url = 'connect?vmid=' + vmid;
-
-            //insert values
-            var nameCell  = newRow.insertCell(0);
-            var namespan = document.createElement("span");
-            namespan.setAttribute("class", "context-menu-one btn btn-neutral");
-            namespan.setAttribute("vmid", vmid);
-            namespan.setAttribute("vmprovider", vmprovider);
-            namespan.textContent = name;
             var href = document.createElement("a");
             href.setAttribute("target", "_blank");
             href.setAttribute('href', url);
-            href.appendChild(namespan);
-            nameCell.appendChild(href);
-            
-            var statusCell = newRow.insertCell(1);
-            var statustxt  = document.createTextNode(status);
-            statusCell.appendChild(statustxt);
-
-            var taskCell = newRow.insertCell(2);
-            var tasktxt  = document.createTextNode(task);
-            taskCell.appendChild(tasktxt);
-
-            var taskStatusCell = newRow.insertCell(3);
-            var taskstatustxt  = document.createTextNode(taskStatus);
-            taskStatusCell.appendChild(taskstatustxt);
+            href.textContent = name;
+			
+			// create span for Actions button
+			var namespan_a = document.createElement("span");
+			namespan_a.setAttribute("class", "context-menu-one btn btn-outline-success btn-sm");
+			namespan_a.setAttribute("vmid", vmid);
+            namespan_a.setAttribute("vmprovider", vmprovider);
+			namespan_a.textContent = "Actions";
+			
+			
+			jobj = new Object();
+			jobj.name = href.outerHTML;
+			jobj.action = namespan_a.outerHTML;
+			jobj.status = status;
+			jobj.task = task;
+			jobj.taskStatus = taskStatus;
+			vmarray.push(jobj);
         }
 
         //add vms to table
@@ -149,23 +160,26 @@
                 VMArray[i]["task"],
                 VMArray[i]["taskStatus"],
                 VMArray[i]["vmid"],
-                VMArray[i]["vmprovider"]
+                VMArray[i]["vmprovider"],
+                VMdata
             )
         }
 
         //change status to "loaded"
-        document.getElementById("loadingStatus").innerHTML = "Загружено";
+        document.getElementById("loadingStatus").innerHTML = "";
+
+        var $table = $('#table')
+		$table.bootstrapTable({data: VMdata})
     }
 
     function errorGetVM(reason, humanReason) {
         if (reason == "unauthenticated") {
-            alert("Your session expired or you was not properly authenticated. Redirecting to login page...");
-            window.location.replace('/logout');
+            loadingFailed("Your session expired or you was not properly authenticated. Redirecting to login page...");
+            window.setTimeout(function() {window.location.replace('/logout');}, 1000)
         } else if (reason == "unauthorized") {
-            // TODO: change from alert to something normal
-            alert("You don't have permissions to this resource");
+            loadingFailed("You don't have permissions to this resource");
         } else {
-            alert(humanReason);
+            loadingFailed(humanReason);
         }
     }
 </script>

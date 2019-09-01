@@ -59,18 +59,17 @@ function crypt(str, key){
 
 function getVMList(url, callbackSuccess, callbackError) {
     function parseVMs(status, text) {
-        if (status !== 200) {
-            resp = JSON.parse(text);
-            callbackError(resp['reason'], resp['human_reason']);
-        } else {
-            try {
-                var data = JSON.parse(text);
-                callbackSuccess(data['list']);
-            } catch (err) {
-                console.log(err);
-            }
-        }
-
+		try {
+			var data = JSON.parse(text);
+			if (status !== 200) {
+				callbackError(data['reason'], data['human_reason']);
+			} else {
+				callbackSuccess(data['list']);
+			}
+		} catch (err) {
+			console.log(err);
+			callbackError("", err);
+		}
     }
 
     httpRequestAsync(

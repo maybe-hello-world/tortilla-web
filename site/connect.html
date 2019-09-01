@@ -2,16 +2,26 @@
 <meta charset="UTF-8">
 <head>
     <title>VM - Tortilla Project</title>
-    <script src="config.js"></script>
-    <script src="functions.js"></script>
-    <script> if (getCookie("sesskey") === undefined) { window.location.replace('/login'); }</script>
+
+    <link href="/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    
+	<script src="/js/jquery.min.js"></script>
+	<script src="/js/bootstrap.js"></script>
+    <script src="/js/config.js"></script>
+    <script src="/js/functions.js"></script>
+
+    <!-- if not logged in - redirect to login page -->
+    <script>
+    if (getCookie("sesskey") === undefined) { window.location.replace('/login'); }
+    </script>
 </head>
 
 <body style="background-color:#000000">
 
 <!-- ctrl alt del button -->
-<input id="cad" value="Ctrl+Alt+Del" type="button">
-<br>
+<nav class="navbar navbar-dark bg-dark">
+	<input id="cad" value="Ctrl+Alt+Del" type="button" class="btn btn-warning btn-sm">
+</nav>
 
 <!-- Guacamole -->
 <script type="text/javascript"
