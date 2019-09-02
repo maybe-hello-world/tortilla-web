@@ -11,9 +11,7 @@ function httpRequestAsync(url, method, headers, data, callback) {
     };
 
     xmlHttp.ontimeout = function () {
-        console.log("timeout");
-        console.log(url);
-        console.log(data);
+        callback(408, "Server timeout");
     };
 
     if (headers !== null) {
