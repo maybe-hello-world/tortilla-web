@@ -2,26 +2,45 @@
 <meta charset="UTF-8">
 <head>
     <title>VM - Tortilla Project</title>
-    <script src="config.js"></script>
-    <script src="functions.js"></script>
-    <script> if (getCookie("sesskey") === undefined) { window.location.replace('/login'); }</script>
+
+    <link href="/css/bootstrap.min.css" rel="stylesheet" type="text/css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link href="/css/connect.min.css" rel="stylesheet" type="text/css">
+
+	<script src="/js/jquery.min.js" type="text/javascript"></script>
+	<script src="/js/bootstrap.min.js" type="text/javascript"></script>
+    <script src="/js/config.min.js" type="text/javascript"></script>
+    <script src="/js/functions.min.js" type="text/javascript"></script>
+
+    <!-- if not logged in - redirect to login page -->
+    <script>
+    if (getCookie("sesskey") === undefined) { window.location.replace('/login'); }
+    </script>
 </head>
 
-<body style="background-color:#000000">
+<body>
 
 <!-- ctrl alt del button -->
-<input id="cad" value="Ctrl+Alt+Del" type="button">
-<br>
+<nav class="navbar navbar-dark bg-dark">
+	<input id="cad" value="Ctrl+Alt+Del" type="button" class="btn btn-warning btn-sm">
+</nav>
 
 <!-- Guacamole -->
 <script type="text/javascript"
         src="guacamole-common-js/all.min.js"></script>
 
 <!-- Display -->
-<div id="display"></div>
+<div id="errorBar" class="errorBar"></div>
+<div id="display" class="display"></div>
 
 <!-- Init -->
 <script type="text/javascript"> /* <![CDATA[ */
+
+    function errorHandler(text) {
+        document.getElementById("display").style.visibility = "hidden";
+        var erbar = document.getElementById("errorBar");
+        erbar.style.visibility = "visible";
+        erbar.innerHTML = text;
+    }
 
     // Get display div from document
     var display = document.getElementById("display");
@@ -32,12 +51,14 @@
     );
 
     // Add client to display div
-    display.appendChild(guac.getDisplay().getElement());
+    var displayElem = guac.getDisplay().getElement()
+    displayElem.style.margin = "auto";
+    display.appendChild(displayElem);
 
     // Error handler
     guac.onerror = function (error) {
         console.log(error);
-        alert(error.message);
+        errorHandler(error.message);
     };
     
 
@@ -83,8 +104,8 @@
 
     var vmid = getParameterByName("vmid");
     if (!vmid) {
-        alert("VMID is incorrect!");
-        window.setTimeout(function() {window.location.replace('/');}, 1000);
+        errorHandler("VMID is incorrect!");
+        window.setTimeout(function() {window.location.replace('/');}, 5000);
     }
 
     var url =   "sesskey=" + getCookie('sesskey') +
